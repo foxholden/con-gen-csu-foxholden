@@ -1,0 +1,151 @@
+---
+title: "About Me"
+author: "Holden C. Fox"
+output:
+  html_document:
+    toc: yes
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+bibliography: references.bib
+---
+
+# Who I am and where I came from
+
+I grew up by the sea in Northwestern Washington. I was pretty into dinosaurs and Pokemon as a little kid as well as all kinds of sports. In high school I really enjoyed Biology, and about the same time I became interested in bird watching as a hobby. 
+
+I went to [Lewis & Clark College](https://www.lclark.edu/) for undergrad. I sampled courses in a couple of other subjects like environmental science, chemistry, and computer science, but found the most success and inspiration in Biology. I thought I might want to become a marine biologist or an ornithologist, before taking some influential courses in phylogenetic biology and molecular evolution that caught my interest.
+
+After my undergrad, I was hired by my Professor's Collaborator to work in their lab at the [University of Arizona](https://www.arizona.edu/) to study brown recluse spider venom evolution. I really enjoyed this work, although I felt a bit out of place without a strong biochemistry background. At the same time, I started becoming pretty active in the Tucson climbing scene. I spent an experience-packed year in Arizona, but decided to leave in order to figure out what I wanted to do with my life.
+
+I ended up joining Kristen's lab for a Masters and have been really enjoying being a grad student. The pop-gen feels totally new to me, but I find it pretty interesting! I've been into birds for a while now, so it is fun to have that hobby align with my work. Out-side of schooling, my top four leisure activities rank as:
+
+1. Rock climbing
+1. Skiing
+1. Birds
+1. Easy to watch sitcoms & dramedies
+
+Here I am at the enjoying some oysters out near Samish Bay this past summer.
+
+```{r me_pic, echo=FALSE, out.width="500px"}
+knitr::include_graphics("holdy.oysters.jpeg", auto_pdf = TRUE)
+```
+
+# Research Interests
+
+I'm interested in understanding the mechanisms that generate and maintain diversity. I find cases of rapid evolution pretty fascinating. I enjoy working with sequence data and find the NGS stuff pretty fun. Right now I'm working on creating a genoscape for loggerhead shrike. I'd be psyched to find a way to test some evolutionary questions somehow.
+
+## Influential papers
+
+@ruegg2014mapping is an influential factor paper in my field. My understanding is that it was an important proof of concept for the genoscape method of mapping population structure and connectivity in a migratory bird. Another influential paper is @bay2018genomic, which demonstrated how genomic adaptive potential can be applied to identify populations in a migratory bird that are at the highest risk due to climate-change.
+
+## The mathematics behind my research
+
+Here is some of the math behind my work. First I'll write the equation for Hardy-Weinberg equilibrium.
+
+$$
+p^2+2pq+q^2=1
+$$
+And here is an equation for calculating Fst!
+
+$$
+[ F_{ST} = \frac{H_T - H_S}{H_T} ]
+$$
+
+## My computing experience
+
+My first programming experience was using R to plot figures and do basic statistical analysis in intro biology lab my first semester in college. I continued to use R throughout undergrad and after for statistics and crafting figures. In undergrad I took a class in C and one in Java. I also fiddled around in python a bit. In a phylogenetics course, I was introduced to the unix shell and bash to make trees using Lewis & Clark's cluster. This semester I've been having weekly meetings with CH to learn how to process my genomic data, so I have been using alpine very frequently for that. Here is some R code to create a file for downsampling.
+
+```r
+depth.frac <- cov %>%
+  # filter(Stage == "Breeding") %>%
+  dplyr::select(bam, coverage) %>%
+  mutate(x5.0 = ifelse(coverage > 5, 5 / coverage, NA)) %>% 
+  filter(coverage > 1)
+
+under1x <- cov  %>% 
+  dplyr::select(bam, coverage) %>%
+  mutate(x5.0 = ifelse(coverage > 5, 5 / coverage, NA)) %>%
+  filter(coverage < 1)
+
+depth.frac
+
+depth.frac.long <- depth.frac %>% 
+  pivot_longer(cols=3, names_to = "Coverage", values_to = "Frac") %>% 
+  mutate(Frac = round(Frac, 2)) %>% 
+  select(bam, Coverage, Frac)
+  
+write_delim(x = depth.frac.long,
+             file = "downsampling_array_full.txt",
+             col_names = F)
+```
+And here is a simple script to run a program called NgsRelate on alpine.
+
+```sh
+#!/bin/bash 
+#
+#all commands that start with SBATCH contain commands that are just used by SLURM for scheduling  
+#################
+#set a job name  
+#SBATCH --job-name=ngsrel
+#################  
+#a file for job output, you can check job progress
+#SBATCH --output=ngsrel.%j.out
+#################
+# a file for errors from the job
+#SBATCH --error=ngsrel.%j.err
+#################
+#time you think you need; default is one hour
+#in minutes in this case
+#SBATCH -t 24:00:00
+#################
+#quality of service; think of it as job priority
+#SBATCH -p amilan
+#################
+#number of nodes
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node 10
+#################
+#SBATCH --mem=37G
+#################
+#get emailed about job BEGIN, END, and FAIL
+#SBATCH --mail-type=END,FAIL
+#################
+#who to send email to; please change to your email
+#SBATCH  --mail-user=foxhol@colostate.edu
+#################
+#now run normal batch commands
+##################
+#echo commands to stdout
+
+set -x
+
+source ~/.bashrc
+module load htslib
+
+NGSRELATE="/projects/foxhol@colostate.edu/ngsRelate"
+
+$NGSRELATE/ngsRelate -h LOSH.5x.merged_gatk.SNP.filtered_gatkVQSR2.PASS.5miss.recode.vcf -n 197 -O LOSH.5x.merged_gatk.SNP.filtered_gatkVQSR2.PASS.5miss.ngsRelate.res -T GT -p 10
+```
+## What I hope to get out of this class
+
+* Competence/independence in the computation side of things (git,cluster computing,bioinformatics,etc).
+* Increased understanding of how some of these programs and tools work.
+* Psych for a new element of this work.
+
+# Evaluating some R code
+
+```{r}
+# Load tidyverse
+library(tidyverse)
+
+howdy <- tibble(word = "Howdy!")
+
+ggplot(howdy, aes(x = 1, y = 1, label = word)) +
+  geom_text(size = 20, color = "red") +
+  theme_void()
+```
+
+# Citations
+
